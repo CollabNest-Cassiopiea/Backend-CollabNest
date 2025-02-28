@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,35 +7,182 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Sample Model declarations
+// ------------------------
+// User & Profiles
+// ------------------------
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  role      String   @default("USER")
-  createdAt DateTime @default(now())
-  projects  Project[]
+  user_id    Int      @id @default(autoincrement())
+  email      String   @unique
+  password   String
+  role       Role
+  created_at DateTime @default(now())
+
+  studentProfile   StudentProfile?
+  mentorProfile    MentorProfile?
+  professorProfile ProfessorProfile?
+  adminProfile     Admin?
+
+  // Inverse relations for Meeting (using explicit relation names)
+  professorMeetings Meeting[] @relation("ProfessorMeetings")
+  studentMeetings   Meeting[] @relation("StudentMeetings")
+
+  // Inverse relations for Project as a mentor or professor
+  mentorProjects    Project[]      @relation("MentorProjects")
+  professorProjects Project[]      @relation("ProfessorProjects")
+  Application       Application[]
+  Task              Task[]
+  Notification      Notification[]
 }
 
+enum Role {
+  Student
+  Mentor
+  Professor
+  Admin
+}
+
+model StudentProfile {
+  student_id Int      @id @default(autoincrement())
+  user_id    Int      @unique
+  name       String
+  bio        String?
+  skills     String[]
+  experience Int
+  branch     String
+  year       Int
+
+  user User @relation(fields: [user_id], references: [user_id])
+}
+
+model MentorProfile {
+  mentor_id  Int      @id @default(autoincrement())
+  user_id    Int      @unique
+  name       String
+  bio        String?
+  skills     String[]
+  experience Int
+  branch     String
+  year       Int
+
+  user User @relation(fields: [user_id], references: [user_id])
+}
+
+model ProfessorProfile {
+  professor_id     Int      @id @default(autoincrement())
+  user_id          Int      @unique
+  name             String
+  department       String
+  research_field   String
+  papers_published String[]
+
+  user User @relation(fields: [user_id], references: [user_id])
+}
+
+model Admin {
+  admin_id    Int      @id @default(autoincrement())
+  user_id     Int      @unique
+  name        String
+  bio         String?
+  permissions String[]
+
+  user User @relation(fields: [user_id], references: [user_id])
+}
+
+// ------------------------
+// Project & Related Models
+// ------------------------
 model Project {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String?
-  domain      String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  mentorId    Int
-  mentor      User     @relation(fields: [mentorId], references: [id])
-  tasks       Task[]
+  project_id   Int           @id @default(autoincrement())
+  title        String
+  description  String?
+  field        String
+  tech_stack   String[]
+  duration     Int
+  mentor_id    Int?
+  professor_id Int?
+  status       ProjectStatus
+  perks        String?
+  created_at   DateTime      @default(now())
+
+  // These fields define the owner/lead for a project.
+  mentor    User? @relation("MentorProjects", fields: [mentor_id], references: [user_id])
+  professor User? @relation("ProfessorProjects", fields: [professor_id], references: [user_id])
+
+  applications Application[]
+  tasks        Task[]
+  meetings     Meeting[]
+}
+
+enum ProjectStatus {
+  Open
+  Closed
+  InProgress
+}
+
+model Application {
+  application_id Int               @id @default(autoincrement())
+  student_id     Int
+  project_id     Int
+  status         ApplicationStatus
+  applied_at     DateTime          @default(now())
+
+  student User    @relation(fields: [student_id], references: [user_id])
+  project Project @relation(fields: [project_id], references: [project_id])
+}
+
+enum ApplicationStatus {
+  Pending
+  Approved
+  Rejected
+  InterviewScheduled
 }
 
 model Task {
-  id          Int      @id @default(autoincrement())
+  task_id     Int        @id @default(autoincrement())
+  project_id  Int
+  assigned_to Int?
   title       String
   description String?
-  status      String   @default("TODO")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  projectId   Int
-  project     Project  @relation(fields: [projectId], references: [id])
+  status      TaskStatus
+  created_at  DateTime   @default(now())
+
+  project      Project @relation(fields: [project_id], references: [project_id])
+  assignedUser User?   @relation(fields: [assigned_to], references: [user_id])
+}
+
+enum TaskStatus {
+  Pending
+  InProgress
+  Completed
+}
+
+model Notification {
+  notification_id Int                @id @default(autoincrement())
+  user_id         Int
+  message         String
+  status          NotificationStatus
+  created_at      DateTime           @default(now())
+
+  user User @relation(fields: [user_id], references: [user_id])
+}
+
+enum NotificationStatus {
+  Unread
+  Read
+}
+
+// ------------------------
+// Meeting
+// ------------------------
+model Meeting {
+  meeting_id   Int      @id @default(autoincrement())
+  project_id   Int
+  professor_id Int?
+  student_id   Int?
+  meeting_link String
+  created_at   DateTime @default(now())
+
+  project   Project @relation(fields: [project_id], references: [project_id])
+  professor User?   @relation("ProfessorMeetings", fields: [professor_id], references: [user_id])
+  student   User?   @relation("StudentMeetings", fields: [student_id], references: [user_id])
 }
