@@ -7,38 +7,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ------------------------
-// User & Profiles
-// ------------------------
 model User {
   user_id    Int      @id @default(autoincrement())
   email      String   @unique
   password   String
-  role       Role
+  role       Role     @default(STUDENT)
   created_at DateTime @default(now())
 
-  studentProfile   StudentProfile?
-  mentorProfile    MentorProfile?
-  professorProfile ProfessorProfile?
-  adminProfile     Admin?
-
-  // Inverse relations for Meeting (using explicit relation names)
-  professorMeetings Meeting[] @relation("ProfessorMeetings")
-  studentMeetings   Meeting[] @relation("StudentMeetings")
-
-  // Inverse relations for Project as a mentor or professor
-  mentorProjects    Project[]      @relation("MentorProjects")
-  professorProjects Project[]      @relation("ProfessorProjects")
-  Application       Application[]
-  Task              Task[]
-  Notification      Notification[]
+  StudentProfile   StudentProfile?
+  MentorProfile    MentorProfile?
+  ProfessorProfile ProfessorProfile?
+  Admin            Admin?
+  Notifications    Notification[]
 }
 
 enum Role {
-  Student
-  Mentor
-  Professor
-  Admin
+  STUDENT
+  MENTOR
+  PROFESSOR
+  ADMIN
 }
 
 model StudentProfile {
@@ -47,35 +34,43 @@ model StudentProfile {
   name       String
   bio        String?
   skills     String[]
-  experience Int
+  experience String?
   branch     String
   year       Int
 
-  user User @relation(fields: [user_id], references: [user_id])
+  projects_in  Project[]
+  applications Application[]
+  meetings     Meeting[]
+  tasks        Task[]
+
+  User User @relation(fields: [user_id], references: [user_id])
 }
 
 model MentorProfile {
-  mentor_id  Int      @id @default(autoincrement())
-  user_id    Int      @unique
-  name       String
-  bio        String?
-  skills     String[]
-  experience Int
-  branch     String
-  year       Int
+  mentor_id   Int       @id @default(autoincrement())
+  user_id     Int       @unique
+  name        String
+  bio         String?
+  skills      String[]
+  experience  String?
+  branch      String
+  year        Int
+  projects_in Project[]
 
-  user User @relation(fields: [user_id], references: [user_id])
+  User User @relation(fields: [user_id], references: [user_id])
 }
 
 model ProfessorProfile {
-  professor_id     Int      @id @default(autoincrement())
-  user_id          Int      @unique
+  professor_id     Int       @id @default(autoincrement())
+  user_id          Int       @unique
   name             String
   department       String
   research_field   String
   papers_published String[]
+  projects_under   Project[]
+  meetings         Meeting[]
 
-  user User @relation(fields: [user_id], references: [user_id])
+  User User @relation(fields: [user_id], references: [user_id])
 }
 
 model Admin {
@@ -85,104 +80,97 @@ model Admin {
   bio         String?
   permissions String[]
 
-  user User @relation(fields: [user_id], references: [user_id])
+  User User @relation(fields: [user_id], references: [user_id])
 }
 
-// ------------------------
-// Project & Related Models
-// ------------------------
 model Project {
   project_id   Int           @id @default(autoincrement())
   title        String
-  description  String?
+  description  String
   field        String
   tech_stack   String[]
-  duration     Int
+  duration     String
   mentor_id    Int?
   professor_id Int?
-  status       ProjectStatus
+  status       ProjectStatus @default(OPEN)
   perks        String?
   created_at   DateTime      @default(now())
 
-  // These fields define the owner/lead for a project.
-  mentor    User? @relation("MentorProjects", fields: [mentor_id], references: [user_id])
-  professor User? @relation("ProfessorProjects", fields: [professor_id], references: [user_id])
-
+  mentor       MentorProfile?    @relation(fields: [mentor_id], references: [mentor_id])
+  professor    ProfessorProfile? @relation(fields: [professor_id], references: [professor_id])
   applications Application[]
   tasks        Task[]
   meetings     Meeting[]
+  students     StudentProfile[]
 }
 
 enum ProjectStatus {
-  Open
-  Closed
-  InProgress
+  OPEN
+  CLOSED
+  IN_PROGRESS
 }
 
 model Application {
   application_id Int               @id @default(autoincrement())
   student_id     Int
   project_id     Int
-  status         ApplicationStatus
+  status         ApplicationStatus @default(PENDING)
   applied_at     DateTime          @default(now())
 
-  student User    @relation(fields: [student_id], references: [user_id])
-  project Project @relation(fields: [project_id], references: [project_id])
+  student StudentProfile @relation(fields: [student_id], references: [student_id])
+  project Project        @relation(fields: [project_id], references: [project_id])
 }
 
 enum ApplicationStatus {
-  Pending
-  Approved
-  Rejected
-  InterviewScheduled
+  PENDING
+  APPROVED
+  REJECTED
+  INTERVIEW_SCHEDULED
 }
 
 model Task {
   task_id     Int        @id @default(autoincrement())
   project_id  Int
-  assigned_to Int?
+  assigned_to Int
   title       String
-  description String?
-  status      TaskStatus
+  description String
+  status      TaskStatus @default(PENDING)
   created_at  DateTime   @default(now())
 
-  project      Project @relation(fields: [project_id], references: [project_id])
-  assignedUser User?   @relation(fields: [assigned_to], references: [user_id])
+  project    Project        @relation(fields: [project_id], references: [project_id])
+  assignedTo StudentProfile @relation(fields: [assigned_to], references: [student_id])
 }
 
 enum TaskStatus {
-  Pending
-  InProgress
-  Completed
+  PENDING
+  IN_PROGRESS
+  COMPLETED
 }
 
 model Notification {
   notification_id Int                @id @default(autoincrement())
   user_id         Int
   message         String
-  status          NotificationStatus
+  status          NotificationStatus @default(UNREAD)
   created_at      DateTime           @default(now())
 
-  user User @relation(fields: [user_id], references: [user_id])
+  User User @relation(fields: [user_id], references: [user_id])
 }
 
 enum NotificationStatus {
-  Unread
-  Read
+  UNREAD
+  READ
 }
 
-// ------------------------
-// Meeting
-// ------------------------
 model Meeting {
   meeting_id   Int      @id @default(autoincrement())
   project_id   Int
-  professor_id Int?
-  student_id   Int?
+  professor_id Int
+  student_id   Int
   meeting_link String
   created_at   DateTime @default(now())
 
-  project   Project @relation(fields: [project_id], references: [project_id])
-  professor User?   @relation("ProfessorMeetings", fields: [professor_id], references: [user_id])
-  student   User?   @relation("StudentMeetings", fields: [student_id], references: [user_id])
+  project   Project          @relation(fields: [project_id], references: [project_id])
+  professor ProfessorProfile @relation(fields: [professor_id], references: [professor_id])
+  student   StudentProfile   @relation(fields: [student_id], references: [student_id])
 }
