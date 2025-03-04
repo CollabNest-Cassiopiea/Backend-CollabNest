@@ -7,9 +7,9 @@ const {
 const router = express.Router();
 
 // GET by query
-router.get('/projects', getAllProjects);
+router.get('/', getAllProjects);
 
 // GET by ID
-router.get('/projects/:projectId', getProjectById);
+router.get('/:projectId', getProjectById);
 
 module.exports = router;
