@@ -9,6 +9,7 @@ const applicationRoutes = require('./src/routes/applicationRoutes');
 const taskRoutes = require('./src/routes/taskRoutes');
 const notificationRoutes = require('./src/routes/notificationRoutes');
 const meetingRoutes = require('./src/routes/meetingRoutes');
+require('dotenv').config();
 
 const app = express();
 app.use(express.json());
