@@ -6,6 +6,8 @@ const {
     updateSkillRatings,
     deleteProfile,
 } = require('../controllers/studentProfileController');
+const express = require('express');
+const router = express.Router();
 
 // Create or Update Student Profile
 router.post('/:id/profile', createOrUpdateProfile);
