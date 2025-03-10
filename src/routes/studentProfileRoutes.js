@@ -1,5 +1,4 @@
-const express = require('express');
-const router = express.Router();
+
 const {
     createOrUpdateProfile,
     getProfile,
@@ -21,3 +20,4 @@ router.get('/projects', getProjectsByFilters);
 router.delete('/:id/profile', deleteProfile);
 
 module.exports = router;
+

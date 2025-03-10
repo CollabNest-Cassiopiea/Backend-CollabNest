@@ -34,3 +34,4 @@ router.post('/:projectId/tasks', authMiddleware, roleCheck(['MENTOR', 'PROFESSOR
 router.get('/:projectId/tasks', authMiddleware, roleCheck(['MENTOR', 'PROFESSOR']), getProjectTasks);
 
 module.exports = router;
+
