@@ -22,7 +22,7 @@ app.use('/api/mentor-profiles', mentorProfileRoutes);
 app.use('/api/professor-profiles', professorProfileRoutes);
 app.use('/api/admins', adminRoutes);
 app.use('/api/projects', projectRoutes);
-app.use('/api/applications', applicationRoutes);
+app.use('/api/projects', applicationRoutes); // application Routes
 app.use('/api/tasks', taskRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/meetings', meetingRoutes);

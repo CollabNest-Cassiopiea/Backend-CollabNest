@@ -95,6 +95,8 @@ async function seedDatabase() {
       projects.push(project);
     }
 
+    
+
     // 3. Create Tasks and Notifications
     console.log('Creating Tasks and Notifications...');
     const students = users.filter(u => u.role === 'STUDENT');
