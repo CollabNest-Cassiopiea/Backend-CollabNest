@@ -2,6 +2,8 @@
 
 const jwt = require("jsonwebtoken");
 const { PrismaClient } = require("@prisma/client");
+
+
 const prisma = new PrismaClient();
 
 // Check if JWT secret is configured
@@ -21,13 +23,15 @@ const authMiddleware = async (req, res, next) => {
         error: "Authentication required. Please provide a valid token.",
       });
     }
-
+    // console.log(authHeader)
     const token = authHeader.split(" ")[1];
 
     try {
       // Verify token
+      // console.log(token)
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+      // console.log(decoded)
       // Get user from database to ensure it still exists and has appropriate permissions
       const user = await prisma.user.findUnique({
         where: { user_id: decoded.userId },
@@ -45,7 +49,7 @@ const authMiddleware = async (req, res, next) => {
           error: "User associated with this token no longer exists",
         });
       }
-
+      // console.log(user)
       // Check if user role matches the one in token
       if (user.role !== decoded.role) {
         return res.status(401).json({
@@ -64,7 +68,7 @@ const authMiddleware = async (req, res, next) => {
         professor_id: user.ProfessorProfile?.professor_id, // Uppercase 'P'
         admin_id: user.Admin?.admin_id
       };
-
+      
       next();
     } catch (error) {
       if (error.name === "TokenExpiredError") {
@@ -93,6 +97,8 @@ const authMiddleware = async (req, res, next) => {
 
 const roleCheck = (roles) => {
   return (req, res, next) => {
+    // console.log("Checking Role:", req.user?.role);
+    // console.log("Allowed Roles:", roles);
     if (!req.user) {
       return res.status(500).json({
         success: false,
@@ -107,7 +113,9 @@ const roleCheck = (roles) => {
         error: "Access denied: insufficient permissions",
       });
     }
-
+    // console.log(req.user)
+    
+  
     next();
   };
 };

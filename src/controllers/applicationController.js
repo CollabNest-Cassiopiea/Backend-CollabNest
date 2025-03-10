@@ -55,70 +55,16 @@ const applyForProject = async (req, res) => {
     }
 };
 
-// Get applications for a project (Mentor/Professor only)
-const getProjectApplications = async (req, res) => {
-    const { projectId } = req.params;
-    // const { user_id, role } = req.user
-    // console.log(projectId)
-    const role='Professor';
-    const user_id='6';
 
-    try {
-        // Ensure only mentors and professors can access this
-        if (role !== 'Mentor' && role !== 'Professor') {
-            return res.status(403).json({ error: "Access Denied . Only mentors and professors can view applications" });
-        }
-
-        // Check if the mentor or professor is assigned to this project
-        const project = await prisma.project.findUnique({
-            where: { project_id: parseInt(projectId) },
-            include: { mentor: true, professor: true }
-        })
-
-        if (!project) {
-            return res.status(400).json({ error: "Project not found" });
-        }
-
-        // Verify if the user is the assigned mentor or professor
-        if (
-            (project.mentor && project.mentor.user_id !== parseInt(user_id)) ||
-            (project.professor && project.professor.user_id !== parseInt(user_id))
-        ) {
-            return res.status(403).json({ error: "Access denied. You are not assigned to this project." });
-        }
-
-        // Fetch applications for this project
-        const applications = await prisma.application.findMany({
-            where: { project_id: parseInt(projectId) },
-            include: { student: true }
-        });
-
-        res.status(200).json({
-            message: "Applications retrieved successfully.",
-            success: true,
-            applications
-        });
-
-
-
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-}
 
 const updateApplicationStatus = async (req, res) => {
     const { projectId, appId } = req.params;
     const { status } = req.body;  // Expected values: "Approved", "Rejected", "Interview_Scheduled"
-    // const { user_id, role } = req.user;
-    const role='Professor';
-    const user_id='6'
+    const { user_id, role } = req.user;
+   
 
     try {
-        // Ensure only mentors and professors can access this
-        if (role !== 'Mentor' && role !== 'Professor') {
-            return res.status(403).json({ error: "Access Denied . Only mentors and professors can view applications" });
-        }
-
+        
         // Validate status
         if (!['APPROVED', 'REJECTED', "INTERVIEW_SCHEDULED"].includes(status)) {
             return res.status(400).json({ error: "Invalid status" });
@@ -169,6 +115,5 @@ const updateApplicationStatus = async (req, res) => {
 
 module.exports = {
     applyForProject,
-    getProjectApplications,
-    updateApplicationStatus
+    updateApplicationStatus,
 }
