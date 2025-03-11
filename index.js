@@ -9,6 +9,7 @@ const applicationRoutes = require('./src/routes/applicationRoutes');
 const taskRoutes = require('./src/routes/taskRoutes');
 const notificationRoutes = require('./src/routes/notificationRoutes');
 const meetingRoutes = require('./src/routes/meetingRoutes');
+const feedbackRoutes = require('./src/routes/feedbackRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -25,6 +26,7 @@ app.use('/api/applications', applicationRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/meetings', meetingRoutes);
+app.use('/api/feedback', feedbackRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 3000;
