@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const userRoutes = require('./src/routes/userRoutes');
 const studentProfileRoutes = require('./src/routes/studentProfileRoutes');
@@ -10,7 +12,6 @@ const taskRoutes = require('./src/routes/taskRoutes');
 const notificationRoutes = require('./src/routes/notificationRoutes');
 const meetingRoutes = require('./src/routes/meetingRoutes');
 const authRoutes = require('./src/routes/authRoutes')
-require('dotenv').config();
 
 const app = express();
 app.use(express.json());

@@ -16,8 +16,16 @@ CREATE TYPE "NotificationStatus" AS ENUM ('UNREAD', 'READ');
 -- CreateTable
 CREATE TABLE "User" (
     "user_id" SERIAL NOT NULL,
-    "email" TEXT NOT NULL,
-    "password" TEXT NOT NULL,
+    "firebase_uid" TEXT NOT NULL,
+    "mail" TEXT NOT NULL,
+    "businessPhones" TEXT[],
+    "displayName" TEXT,
+    "givenName" TEXT,
+    "jobTitle" TEXT,
+    "mobilePhone" TEXT,
+    "officeLocation" TEXT,
+    "preferredLanguage" TEXT,
+    "surname" TEXT,
     "role" "Role" NOT NULL DEFAULT 'STUDENT',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -34,6 +42,7 @@ CREATE TABLE "StudentProfile" (
     "experience" TEXT,
     "branch" TEXT NOT NULL,
     "year" INTEGER NOT NULL,
+    "rollno" INTEGER NOT NULL,
 
     CONSTRAINT "StudentProfile_pkey" PRIMARY KEY ("student_id")
 );
@@ -148,7 +157,10 @@ CREATE TABLE "_ProjectToStudentProfile" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+CREATE UNIQUE INDEX "User_firebase_uid_key" ON "User"("firebase_uid");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_mail_key" ON "User"("mail");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "StudentProfile_user_id_key" ON "StudentProfile"("user_id");

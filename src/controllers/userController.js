@@ -4,149 +4,149 @@ const { generateToken } = require('./authController');
 const prisma = new PrismaClient();
 
 // Create a new user and generate a JWT token
-exports.createUser = async (req, res) => {
-  const { email, password, role, profileData } = req.body;
+// exports.createUser = async (req, res) => {
+//   const { email, password, role, profileData } = req.body;
 
-  // Validate required inputs
-  if (!email || !password || !role) {
-    return res.status(400).json({
-      success: false,
-      error: 'Email, password, and role are required'
-    });
-  }
+//   // Validate required inputs
+//   if (!email || !password || !role) {
+//     return res.status(400).json({
+//       success: false,
+//       error: 'Email, password, and role are required'
+//     });
+//   }
 
-  try {
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({ where: { email } });
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        error: 'User with this email already exists'
-      });
-    }
+//   try {
+//     // Check if user already exists
+//     const existingUser = await prisma.user.findUnique({ where: { email } });
+//     if (existingUser) {
+//       return res.status(400).json({
+//         success: false,
+//         error: 'User with this email already exists'
+//       });
+//     }
 
-    // Hash the password directly without salt
-    const hashedPassword = await bcrypt.hash(password, 10);
+//     // Hash the password directly without salt
+//     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Normalize role to uppercase (to match your Prisma enum)
-    const normalizedRole = role.toUpperCase();
+//     // Normalize role to uppercase (to match your Prisma enum)
+//     const normalizedRole = role.toUpperCase();
 
-    // Define required profile fields for each role
-    const requiredFields = {
-      STUDENT: ['name', 'branch', 'year'],
-      MENTOR: ['name', 'branch', 'year'],
-      PROFESSOR: ['name', 'department', 'research_field'],
-      ADMIN: ['name']
-    };
+//     // Define required profile fields for each role
+//     const requiredFields = {
+//       STUDENT: ['name', 'branch', 'year'],
+//       MENTOR: ['name', 'branch', 'year'],
+//       PROFESSOR: ['name', 'department', 'research_field'],
+//       ADMIN: ['name']
+//     };
 
-    // Ensure profileData is provided and contains all required fields
-    if (!profileData) {
-      return res.status(400).json({
-        success: false,
-        error: `Profile data is required for ${normalizedRole} role`
-      });
-    }
+//     // Ensure profileData is provided and contains all required fields
+//     if (!profileData) {
+//       return res.status(400).json({
+//         success: false,
+//         error: `Profile data is required for ${normalizedRole} role`
+//       });
+//     }
 
-    const missingFields = [];
-    for (const field of requiredFields[normalizedRole] || []) {
-      if (!profileData[field]) {
-        missingFields.push(field);
-      }
-    }
-    if (missingFields.length > 0) {
-      return res.status(400).json({
-        success: false,
-        error: `Missing required profile fields: ${missingFields.join(', ')}`
-      });
-    }
+//     const missingFields = [];
+//     for (const field of requiredFields[normalizedRole] || []) {
+//       if (!profileData[field]) {
+//         missingFields.push(field);
+//       }
+//     }
+//     if (missingFields.length > 0) {
+//       return res.status(400).json({
+//         success: false,
+//         error: `Missing required profile fields: ${missingFields.join(', ')}`
+//       });
+//     }
 
-    // Run a transaction to create both the user and the role-specific profile
-    const { user, profile } = await prisma.$transaction(async (tx) => {
-      // Create the user record
-      const user = await tx.user.create({
-        data: { email, password: hashedPassword, role: normalizedRole }
-      });
-      let profile;
-      // Create the corresponding profile based on role
-      switch (normalizedRole) {
-        case 'STUDENT':
-          profile = await tx.studentProfile.create({
-            data: {
-              user_id: user.user_id,
-              name: profileData.name,
-              bio: profileData.bio || null,
-              skills: profileData.skills || [],
-              experience: profileData.experience || null,
-              branch: profileData.branch,
-              year: parseInt(profileData.year)
-            }
-          });
-          break;
-        case 'MENTOR':
-          profile = await tx.mentorProfile.create({
-            data: {
-              user_id: user.user_id,
-              name: profileData.name,
-              bio: profileData.bio || null,
-              skills: profileData.skills || [],
-              experience: profileData.experience || null,
-              branch: profileData.branch,
-              year: parseInt(profileData.year)
-            }
-          });
-          break;
-        case 'PROFESSOR':
-          profile = await tx.professorProfile.create({
-            data: {
-              user_id: user.user_id,
-              name: profileData.name,
-              department: profileData.department,
-              research_field: profileData.research_field,
-              papers_published: profileData.papers_published || []
-            }
-          });
-          break;
-        case 'ADMIN':
-          profile = await tx.admin.create({
-            data: {
-              user_id: user.user_id,
-              name: profileData.name,
-              bio: profileData.bio || null,
-              permissions: profileData.permissions || []
-            }
-          });
-          break;
-        default:
-          throw new Error(`Invalid role: ${normalizedRole}. Must be STUDENT, MENTOR, PROFESSOR, or ADMIN.`);
-      }
-      return { user, profile };
-    });
+//     // Run a transaction to create both the user and the role-specific profile
+//     const { user, profile } = await prisma.$transaction(async (tx) => {
+//       // Create the user record
+//       const user = await tx.user.create({
+//         data: { email, password: hashedPassword, role: normalizedRole }
+//       });
+//       let profile;
+//       // Create the corresponding profile based on role
+//       switch (normalizedRole) {
+//         case 'STUDENT':
+//           profile = await tx.studentProfile.create({
+//             data: {
+//               user_id: user.user_id,
+//               name: profileData.name,
+//               bio: profileData.bio || null,
+//               skills: profileData.skills || [],
+//               experience: profileData.experience || null,
+//               branch: profileData.branch,
+//               year: parseInt(profileData.year)
+//             }
+//           });
+//           break;
+//         case 'MENTOR':
+//           profile = await tx.mentorProfile.create({
+//             data: {
+//               user_id: user.user_id,
+//               name: profileData.name,
+//               bio: profileData.bio || null,
+//               skills: profileData.skills || [],
+//               experience: profileData.experience || null,
+//               branch: profileData.branch,
+//               year: parseInt(profileData.year)
+//             }
+//           });
+//           break;
+//         case 'PROFESSOR':
+//           profile = await tx.professorProfile.create({
+//             data: {
+//               user_id: user.user_id,
+//               name: profileData.name,
+//               department: profileData.department,
+//               research_field: profileData.research_field,
+//               papers_published: profileData.papers_published || []
+//             }
+//           });
+//           break;
+//         case 'ADMIN':
+//           profile = await tx.admin.create({
+//             data: {
+//               user_id: user.user_id,
+//               name: profileData.name,
+//               bio: profileData.bio || null,
+//               permissions: profileData.permissions || []
+//             }
+//           });
+//           break;
+//         default:
+//           throw new Error(`Invalid role: ${normalizedRole}. Must be STUDENT, MENTOR, PROFESSOR, or ADMIN.`);
+//       }
+//       return { user, profile };
+//     });
 
-    // Generate JWT token using the created user record
-    const token = generateToken(user);
+//     // Generate JWT token using the created user record
+//     const token = generateToken(user);
 
-    // Remove the password from the response object
-    const userWithoutPassword = {
-      user_id: user.user_id,
-      email: user.email,
-      role: user.role,
-      created_at: user.created_at
-    };
+//     // Remove the password from the response object
+//     const userWithoutPassword = {
+//       user_id: user.user_id,
+//       email: user.email,
+//       role: user.role,
+//       created_at: user.created_at
+//     };
 
-    return res.status(201).json({
-      success: true,
-      message: 'User created successfully with profile',
-      user: userWithoutPassword,
-      profile,
-      token
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-};
+//     return res.status(201).json({
+//       success: true,
+//       message: 'User created successfully with profile',
+//       user: userWithoutPassword,
+//       profile,
+//       token
+//     });
+//   } catch (error) {
+//     return res.status(500).json({
+//       success: false,
+//       error: error.message
+//     });
+//   }
+// };
 
 // Get all users with their profiles
 exports.getAllUsers = async (req, res) => {
