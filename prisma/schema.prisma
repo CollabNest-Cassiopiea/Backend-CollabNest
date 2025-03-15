@@ -7,57 +7,43 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-enum Role {
-  STUDENT
-  MENTOR
-  PROFESSOR
-  ADMIN
-}
-
-
 model User {
-  user_id    Int      @id @default(autoincrement())
-  firebase_uid String @unique
-  mail String @unique
-  businessPhones String[]
-  displayName String?
-  givenName String?
-  jobTitle String?
-  mobilePhone String?
-  officeLocation String?
+  user_id           Int               @id @default(autoincrement())
+  firebase_uid      String            @unique
+  mail              String            @unique
+  businessPhones    String[]
+  displayName       String?
+  givenName         String?
+  jobTitle          String?
+  mobilePhone       String?
+  officeLocation    String?
   preferredLanguage String?
-  surname String?
-
-  role       Role     @default(STUDENT)
-  created_at DateTime @default(now())
-
-  StudentProfile   StudentProfile?
-  MentorProfile    MentorProfile?
-  ProfessorProfile ProfessorProfile?
-  Admin            Admin?
-  Notifications    Notification[]
-  Feedback         Feedback[]
-  
+  surname           String?
+  role              Role              @default(STUDENT)
+  created_at        DateTime          @default(now())
+  Admin             Admin?
+  Feedback          Feedback[]
+  MentorProfile     MentorProfile?
+  Notifications     Notification[]
+  ProfessorProfile  ProfessorProfile?
+  StudentProfile    StudentProfile?
 }
 
 model StudentProfile {
-  student_id Int      @id @default(autoincrement())
-  user_id    Int      @unique
-  name       String
-  bio        String?
-  skills     String[]
-  experience String?
-  branch     String
-  year       Int
-  rollno     String
-
-  projects_in  Project[]
+  student_id   Int           @id @default(autoincrement())
+  user_id      Int           @unique
+  name         String
+  bio          String?
+  skills       String[]
+  experience   String?
+  branch       String
+  year         Int
+  rollno       String
   applications Application[]
   meetings     Meeting[]
+  User         User          @relation(fields: [user_id], references: [user_id])
   tasks        Task[]
-
-  User User @relation(fields: [user_id], references: [user_id])
+  projects_in  Project[]     @relation("ProjectToStudentProfile")
 }
 
 model MentorProfile {
@@ -69,9 +55,8 @@ model MentorProfile {
   experience  String?
   branch      String
   year        Int
+  User        User      @relation(fields: [user_id], references: [user_id])
   projects_in Project[]
-
-  User User @relation(fields: [user_id], references: [user_id])
 }
 
 model ProfessorProfile {
@@ -81,10 +66,9 @@ model ProfessorProfile {
   department       String
   research_field   String
   papers_published String[]
-  projects_under   Project[]
   meetings         Meeting[]
-
-  User User @relation(fields: [user_id], references: [user_id])
+  User             User      @relation(fields: [user_id], references: [user_id])
+  projects_under   Project[]
 }
 
 model Admin {
@@ -93,12 +77,11 @@ model Admin {
   name        String
   bio         String?
   permissions String[]
-
-  User User @relation(fields: [user_id], references: [user_id])
+  User        User     @relation(fields: [user_id], references: [user_id])
 }
 
 model Project {
-  project_id   Int           @id @default(autoincrement())
+  project_id   Int               @id @default(autoincrement())
   title        String
   description  String
   field        String
@@ -106,22 +89,15 @@ model Project {
   duration     String
   mentor_id    Int?
   professor_id Int?
-  status       ProjectStatus @default(OPEN)
+  status       ProjectStatus     @default(OPEN)
   perks        String?
-  created_at   DateTime      @default(now())
-
+  created_at   DateTime          @default(now())
+  applications Application[]
+  meetings     Meeting[]
   mentor       MentorProfile?    @relation(fields: [mentor_id], references: [mentor_id])
   professor    ProfessorProfile? @relation(fields: [professor_id], references: [professor_id])
-  applications Application[]
   tasks        Task[]
-  meetings     Meeting[]
-  students     StudentProfile[]
-}
-
-enum ProjectStatus {
-  OPEN
-  CLOSED
-  IN_PROGRESS
+  students     StudentProfile[]  @relation("ProjectToStudentProfile")
 }
 
 model Application {
@@ -130,9 +106,64 @@ model Application {
   project_id     Int
   status         ApplicationStatus @default(PENDING)
   applied_at     DateTime          @default(now())
+  project        Project           @relation(fields: [project_id], references: [project_id])
+  student        StudentProfile    @relation(fields: [student_id], references: [student_id])
+}
 
-  student StudentProfile @relation(fields: [student_id], references: [student_id])
-  project Project        @relation(fields: [project_id], references: [project_id])
+model Task {
+  task_id     Int            @id @default(autoincrement())
+  project_id  Int
+  assigned_to Int
+  title       String
+  description String
+  status      TaskStatus     @default(PENDING)
+  created_at  DateTime       @default(now())
+  assignedTo  StudentProfile @relation(fields: [assigned_to], references: [student_id])
+  project     Project        @relation(fields: [project_id], references: [project_id])
+}
+
+model Notification {
+  notification_id Int                @id @default(autoincrement())
+  user_id         Int
+  message         String
+  status          NotificationStatus @default(UNREAD)
+  created_at      DateTime           @default(now())
+  User            User               @relation(fields: [user_id], references: [user_id])
+}
+
+model Meeting {
+  meeting_id   Int              @id @default(autoincrement())
+  project_id   Int
+  professor_id Int
+  student_id   Int
+  meeting_link String
+  created_at   DateTime         @default(now())
+  professor    ProfessorProfile @relation(fields: [professor_id], references: [professor_id])
+  project      Project          @relation(fields: [project_id], references: [project_id])
+  student      StudentProfile   @relation(fields: [student_id], references: [student_id])
+}
+
+model Feedback {
+  feedback_id Int      @id @default(autoincrement())
+  message     String
+  user_id     Int
+  created_at  DateTime @default(now())
+  user        User     @relation(fields: [user_id], references: [user_id])
+
+  @@index([user_id])
+}
+
+enum Role {
+  STUDENT
+  MENTOR
+  PROFESSOR
+  ADMIN
+}
+
+enum ProjectStatus {
+  OPEN
+  CLOSED
+  IN_PROGRESS
 }
 
 enum ApplicationStatus {
@@ -142,59 +173,13 @@ enum ApplicationStatus {
   INTERVIEW_SCHEDULED
 }
 
-model Task {
-  task_id     Int        @id @default(autoincrement())
-  project_id  Int
-  assigned_to Int
-  title       String
-  description String
-  status      TaskStatus @default(PENDING)
-  created_at  DateTime   @default(now())
-
-  project    Project        @relation(fields: [project_id], references: [project_id])
-  assignedTo StudentProfile @relation(fields: [assigned_to], references: [student_id])
-}
-
 enum TaskStatus {
   PENDING
   IN_PROGRESS
   COMPLETED
 }
 
-model Notification {
-  notification_id Int                @id @default(autoincrement())
-  user_id         Int
-  message         String
-  status          NotificationStatus @default(UNREAD)
-  created_at      DateTime           @default(now())
-
-  User User @relation(fields: [user_id], references: [user_id])
-}
-
 enum NotificationStatus {
   UNREAD
   READ
-}
-
-model Meeting {
-  meeting_id   Int      @id @default(autoincrement())
-  project_id   Int
-  professor_id Int
-  student_id   Int
-  meeting_link String
-  created_at   DateTime @default(now())
-
-  project   Project          @relation(fields: [project_id], references: [project_id])
-  professor ProfessorProfile @relation(fields: [professor_id], references: [professor_id])
-  student   StudentProfile   @relation(fields: [student_id], references: [student_id])
-}
-
-model Feedback {
-  feedback_id Int      @id @default(autoincrement())
-  message    String   @db.Text
-  user_id    Int
-  created_at DateTime @default(now())
-  user       User     @relation(fields: [user_id], references: [user_id])
-
-  @@index([user_id])
 }
