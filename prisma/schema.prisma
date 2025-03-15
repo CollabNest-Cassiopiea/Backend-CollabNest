@@ -181,11 +181,7 @@ enum ApplicationStatus {
   INTERVIEW_SCHEDULED
 }
 
-enum TaskStatus {
-  PENDING
-  IN_PROGRESS
-  COMPLETED
-}
+
 
 enum NotificationStatus {
   UNREAD
