@@ -7,31 +7,33 @@ const {
     createProject,
     updateProject,
     deleteProject,
-    getProjectApplications,
-    updateApplicationStatus,
-    createTask,
-    getProjectTasks
+    trackProjectProgress
 } = require('../controllers/projectController');
 const { authMiddleware, roleCheck } = require('../middlewares/authMiddleware');
 
+const applicationRoutes = require('./applicationRoutes');
+const taskRoutes = require('./taskRoutes');
+
+const app = express();
+
 const router = express.Router();
+
+// Applications
+app.use('/:projectId/applications',applicationRoutes);
+
+// Tasks
+app.use('/:projectId/tasks',taskRoutes);
 
 // Public routes
 router.get('/', getAllProjects);
 router.get('/:projectId', getProjectById);
+router.get('/:projectId/trackProgress',trackProjectProgress);
 
 // Protected routes - require authentication
 router.post('/', authMiddleware, roleCheck(['MENTOR', 'PROFESSOR']), createProject);
 router.put('/:projectId', authMiddleware, roleCheck(['MENTOR', 'PROFESSOR']), updateProject);
 router.delete('/:projectId', authMiddleware, roleCheck(['MENTOR', 'PROFESSOR']), deleteProject);
 
-// Applications
-router.get('/:projectId/applications', authMiddleware, roleCheck(['MENTOR', 'PROFESSOR']), getProjectApplications);
-router.put('/applications/:applicationId', authMiddleware, roleCheck(['MENTOR', 'PROFESSOR']), updateApplicationStatus);
-
-// Tasks
-router.post('/:projectId/tasks', authMiddleware, roleCheck(['MENTOR', 'PROFESSOR']), createTask);
-router.get('/:projectId/tasks', authMiddleware, roleCheck(['MENTOR', 'PROFESSOR']), getProjectTasks);
 
 module.exports = router;
 
