@@ -145,14 +145,15 @@ enum ApplicationStatus {
 model Task {
   task_id     Int        @id @default(autoincrement())
   project_id  Int
-  assigned_to Int
+  assigned_to Int?
   title       String
   description String
   status      TaskStatus @default(PENDING)
   created_at  DateTime   @default(now())
+  deadline    Int?
 
-  project    Project        @relation(fields: [project_id], references: [project_id])
-  assignedTo StudentProfile @relation(fields: [assigned_to], references: [student_id])
+  project    Project         @relation(fields: [project_id], references: [project_id])
+  assignedTo StudentProfile? @relation(fields: [assigned_to], references: [student_id]) // Nullable field
 }
 
 enum TaskStatus {
