@@ -25,8 +25,10 @@ app.use('/:projectId/applications',applicationRoutes);
 app.use('/:projectId/tasks',taskRoutes);
 
 // Public routes
-router.get('/', getAllProjects);
 router.get('/:projectId', getProjectById);
+
+// This route should handle fetching all projects
+router.get('/', authMiddleware, roleCheck(["STUDENT"]), getAllProjects);
 router.get('/:projectId/trackProgress',trackProjectProgress);
 
 // Protected routes - require authentication
