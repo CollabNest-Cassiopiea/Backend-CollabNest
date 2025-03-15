@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const userRoutes = require('./src/routes/userRoutes');
 const studentProfileRoutes = require('./src/routes/studentProfileRoutes');
@@ -9,8 +11,9 @@ const applicationRoutes = require('./src/routes/applicationRoutes');
 const taskRoutes = require('./src/routes/taskRoutes');
 const notificationRoutes = require('./src/routes/notificationRoutes');
 const meetingRoutes = require('./src/routes/meetingRoutes');
+const feedbackRoutes = require('./src/routes/feedbackRoutes');
 const authRoutes = require('./src/routes/authRoutes')
-require('dotenv').config();
+
 
 const app = express();
 app.use(express.json());
@@ -26,7 +29,9 @@ app.use('/api/projects', projectRoutes);
 // app.use('/api/tasks', taskRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/meetings', meetingRoutes);
+app.use('/api/feedback', feedbackRoutes);
 app.use('/api/auth', authRoutes);
+
 
 // Start the server
 const PORT = process.env.PORT || 3000;

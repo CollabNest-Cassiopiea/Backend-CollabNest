@@ -18,14 +18,13 @@ const createTask = async (req, res) => {
         }
 
         // Verify if current user is mentor or professor for this project
+
         // const userId = req.user.user_id;
         const isMentor = project.mentor_id === req.user.mentor_id;
         const isProfessor = project.professor_id === req.user.professor_id;
         if (!isMentor && !isProfessor) {
-            return res.status(403).json({ error: 'Unauthorized' });
+            return res.status(403).json({ error: 'Not authorized to create tasks for this project' });
         }
-
-
         // Create the task
         const task = await prisma.task.create({
             data: {
@@ -63,12 +62,12 @@ const getProjectTasks = async (req, res) => {
 
         // Verify if current user is mentor or professor for this project
         const userId = req.user.user_id;
+
         const isMentor = project.mentor_id === req.user.mentor_id;
         const isProfessor = project.professor_id === req.user.professor_id;
         if (!isMentor && !isProfessor) {
-            return res.status(403).json({ error: 'Unauthorized' });
+            return res.status(403).json({ error: 'Not authorized to view tasks for this project' });
         }
-
 
         const tasks = await prisma.task.findMany({
             where: { project_id: parseInt(projectId) },
@@ -86,7 +85,6 @@ const getProjectTasks = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
 
 const assignTaskToUser = async (req, res) => {
     try {
@@ -151,11 +149,10 @@ const assignTaskToUser = async (req, res) => {
     }
 };
 
-
 const updateTask = async function (req, res) {
     try {
         const { projectId, taskId } = req.params;
-        const { assigned_to, title, description, status } = req.body;
+        const { assigned_to, title, description, status,deadline } = req.body;
 
         const task = await prisma.task.findUnique({
             where: { task_id: parseInt(taskId) }
@@ -183,12 +180,12 @@ const updateTask = async function (req, res) {
             where: { task_id: parseInt(taskId) },
             data: {
                 assigned_to: assigned_to ? parseInt(assigned_to) : undefined, 
+                deadline: deadline ? parseInt(deadline) : undefined,
                 title,
                 description,
                 status: status || undefined
             }
         });
-        
 
         res.status(200).json({
             message: "Task updated successfully",
@@ -221,6 +218,7 @@ const deleteTask = async function (req, res) {
         if (!project) {
             return res.status(404).json({ error: 'Project not found' });
         }
+
 
         const isMentor = project.mentor_id === req.user.mentor_id;
         const isProfessor = project.professor_id === req.user.professor_id;

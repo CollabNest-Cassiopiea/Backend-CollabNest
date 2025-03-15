@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node index.js",
+    "proxy": "echo \"MAKE SURE TO run `npm run start` also to start the backend\" && node scripts/reverse_proxy.js"
   },
   "repository": {
     "type": "git",
@@ -28,6 +29,8 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "firebase-admin": "^13.2.0",
+    "http-proxy": "^1.18.1",
     "jsonwebtoken": "^9.0.2",
     "nodemon": "^3.1.9",
     "pg": "^8.13.3",

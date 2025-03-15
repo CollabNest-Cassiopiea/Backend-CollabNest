@@ -1,4 +1,3 @@
-
 // src/controllers/projectController.js
 
 const { PrismaClient } = require('@prisma/client');
@@ -156,8 +155,8 @@ const deleteProject = async (req, res) => {
         }
         
         // projectController.js (updateProject/deleteProject)
-        const isMentor = project.mentor_id === req.user.mentor_id;
-        const isProfessor = project.professor_id === req.user.professor_id;
+        const isMentor = (project.mentor_id === req.user.mentor_id);
+        const isProfessor = (project.professor_id === req.user.professor_id);
         if (!isMentor && !isProfessor) {
           return res.status(403).json({ error: 'Unauthorized' });
         }
@@ -242,4 +241,3 @@ module.exports = {
     deleteProject,
     trackProjectProgress
 };
-

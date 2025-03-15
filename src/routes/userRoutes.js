@@ -4,7 +4,7 @@ const userController = require('../controllers/userController');  // Import ever
 const { authMiddleware } = require('../middlewares/authMiddleware');
 
 // Public route to create a new user
-router.post('/register', userController.createUser);
+// router.post('/register', userController.createUser); // TODO add option to update profile after oauth login do not make register
 
 // Protected routes (require authentication)
 router.get('/', authMiddleware, userController.getAllUsers);
