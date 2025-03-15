@@ -1,20 +1,16 @@
-// src/middleware/authMiddleware.js
-
-const jwt = require("jsonwebtoken");
+const admin = require("firebase-admin");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-// Check if JWT secret is configured
-if (!process.env.JWT_SECRET) {
-  console.error("CRITICAL ERROR: JWT_SECRET environment variable is not set!");
-  process.exit(1); // Exit the application as this is critical
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(require("../serviceAccountKey.json")),
+  });
 }
 
 const authMiddleware = async (req, res, next) => {
   try {
-    // Get token from header
     const authHeader = req.headers.authorization;
-
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
         success: false,
@@ -25,12 +21,13 @@ const authMiddleware = async (req, res, next) => {
     const token = authHeader.split(" ")[1];
 
     try {
-      // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      // ✅ Verify Firebase Token
+      const decoded = await admin.auth().verifyIdToken(token);
+      console.log("✅ Firebase Token Verified:", decoded);
 
-      // Get user from database to ensure it still exists and has appropriate permissions
+      // ✅ Fetch user from the database using `mail`
       const user = await prisma.user.findUnique({
-        where: { user_id: decoded.userId },
+        where: { mail: decoded.email }, // 🔥 FIX: Changed email → mail
         include: {
           StudentProfile: true,
           MentorProfile: true,
@@ -46,42 +43,23 @@ const authMiddleware = async (req, res, next) => {
         });
       }
 
-      // Check if user role matches the one in token
-      if (user.role !== decoded.role) {
-        return res.status(401).json({
-          success: false,
-          error: "User role has changed. Please login again.",
-        });
-      }
-
-      // Attach user to request object
       req.user = {
         user_id: user.user_id,
-        email: user.email,
+        email: user.mail, // 🔥 FIX: Use `mail` instead of `email`
         role: user.role,
-        student_id: user.StudentProfile?.student_id,  // Uppercase 'S'
-        mentor_id: user.MentorProfile?.mentor_id,      // Uppercase 'M'
-        professor_id: user.ProfessorProfile?.professor_id, // Uppercase 'P'
-        admin_id: user.Admin?.admin_id
+        student_id: user.StudentProfile?.student_id || null,
+        mentor_id: user.MentorProfile?.mentor_id || null,
+        professor_id: user.ProfessorProfile?.professor_id || null,
+        admin_id: user.Admin?.admin_id || null,
       };
 
       next();
     } catch (error) {
-      if (error.name === "TokenExpiredError") {
-        return res.status(401).json({
-          success: false,
-          error: "Token expired. Please login again.",
-        });
-      }
-
-      if (error.name === "JsonWebTokenError") {
-        return res.status(401).json({
-          success: false,
-          error: "Invalid token. Please login again.",
-        });
-      }
-
-      throw error; // If it's another type of error, pass it to the catch block
+      
+      return res.status(401).json({
+        success: false,
+        error: "Invalid token. Please login again.",
+      });
     }
   } catch (error) {
     return res.status(500).json({
