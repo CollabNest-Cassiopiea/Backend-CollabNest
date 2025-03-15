@@ -34,6 +34,4 @@ router.post('/', authMiddleware, roleCheck(['MENTOR', 'PROFESSOR']), createProje
 router.put('/:projectId', authMiddleware, roleCheck(['MENTOR', 'PROFESSOR']), updateProject);
 router.delete('/:projectId', authMiddleware, roleCheck(['MENTOR', 'PROFESSOR']), deleteProject);
 
-
 module.exports = router;
-
