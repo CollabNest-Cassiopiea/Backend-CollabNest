@@ -1,5 +1,4 @@
-const express = require('express');
-const router = express.Router();
+
 const {
     createOrUpdateProfile,
     getProfile,
@@ -7,6 +6,8 @@ const {
     updateSkillRatings,
     deleteProfile,
 } = require('../controllers/studentProfileController');
+const express = require('express');
+const router = express.Router();
 
 // Create or Update Student Profile
 router.post('/:id/profile', createOrUpdateProfile);
@@ -21,3 +22,4 @@ router.get('/projects', getProjectsByFilters);
 router.delete('/:id/profile', deleteProfile);
 
 module.exports = router;
+

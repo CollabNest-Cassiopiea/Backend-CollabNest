@@ -7,10 +7,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
+enum Role {
+  STUDENT
+  MENTOR
+  PROFESSOR
+  ADMIN
+}
+
+
 model User {
   user_id    Int      @id @default(autoincrement())
-  email      String   @unique
-  password   String
+  firebase_uid String @unique
+  mail String @unique
+  businessPhones String[]
+  displayName String?
+  givenName String?
+  jobTitle String?
+  mobilePhone String?
+  officeLocation String?
+  preferredLanguage String?
+  surname String?
+
   role       Role     @default(STUDENT)
   created_at DateTime @default(now())
 
@@ -23,13 +41,6 @@ model User {
   
 }
 
-enum Role {
-  STUDENT
-  MENTOR
-  PROFESSOR
-  ADMIN
-}
-
 model StudentProfile {
   student_id Int      @id @default(autoincrement())
   user_id    Int      @unique
@@ -39,6 +50,7 @@ model StudentProfile {
   experience String?
   branch     String
   year       Int
+  rollno     String
 
   projects_in  Project[]
   applications Application[]

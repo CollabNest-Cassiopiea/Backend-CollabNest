@@ -1,18 +1,15 @@
-// src/routes/userRoutes.js
-
 const express = require('express');
-const { createUser, getAllUsers, getUserById, updateUser, deleteUser } = require('../controllers/userController');
+const router = express.Router();
+const userController = require('../controllers/userController');  // Import everything as an object
 const { authMiddleware } = require('../middlewares/authMiddleware');
 
-const router = express.Router();
-
 // Public route to create a new user
-router.post('/register', createUser);
+// router.post('/register', userController.createUser); // TODO add option to update profile after oauth login do not make register
 
 // Protected routes (require authentication)
-router.get('/', authMiddleware, getAllUsers);
-router.get('/:id', authMiddleware, getUserById);
-router.put('/:id', authMiddleware, updateUser);
-router.delete('/:id', authMiddleware, deleteUser);
+router.get('/', authMiddleware, userController.getAllUsers);
+router.get('/:id', authMiddleware, userController.getUserById);
+router.put('/:id', authMiddleware, userController.updateUser);
+router.delete('/:id', authMiddleware, userController.deleteUser);
 
 module.exports = router;

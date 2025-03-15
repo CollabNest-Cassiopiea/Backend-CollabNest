@@ -1,7 +1,10 @@
 const express = require('express');
-const { loginUser } = require('../controllers/authController');
+const { oauthMicrosoft, checkauth } = require('../controllers/authController');
+const { authMiddleware ,roleCheck } = require('../middlewares/authMiddleware');
+
 const router = express.Router();
 
-router.post('/login', loginUser);
+router.post('/oauthMicrosoft', oauthMicrosoft)
+router.get('/check-auth', authMiddleware, checkauth)
 
 module.exports = router;
