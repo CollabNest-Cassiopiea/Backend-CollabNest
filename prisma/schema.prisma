@@ -37,6 +37,8 @@ model User {
   ProfessorProfile ProfessorProfile?
   Admin            Admin?
   Notifications    Notification[]
+  Feedback         Feedback[]
+  
 }
 
 model StudentProfile {
@@ -185,4 +187,14 @@ model Meeting {
   project   Project          @relation(fields: [project_id], references: [project_id])
   professor ProfessorProfile @relation(fields: [professor_id], references: [professor_id])
   student   StudentProfile   @relation(fields: [student_id], references: [student_id])
+}
+
+model Feedback {
+  feedback_id Int      @id @default(autoincrement())
+  message    String   @db.Text
+  user_id    Int
+  created_at DateTime @default(now())
+  user       User     @relation(fields: [user_id], references: [user_id])
+
+  @@index([user_id])
 }
