@@ -44,6 +44,7 @@ model StudentProfile {
   User         User          @relation(fields: [user_id], references: [user_id])
   tasks        Task[]
   projects_in  Project[]     @relation("ProjectToStudentProfile")
+  certificates Certificate[] // ✅ Added relation
 }
 
 model MentorProfile {
@@ -60,15 +61,16 @@ model MentorProfile {
 }
 
 model ProfessorProfile {
-  professor_id     Int       @id @default(autoincrement())
-  user_id          Int       @unique
+  professor_id     Int           @id @default(autoincrement())
+  user_id          Int           @unique
   name             String
   department       String
   research_field   String
   papers_published String[]
   meetings         Meeting[]
-  User             User      @relation(fields: [user_id], references: [user_id])
+  User             User          @relation(fields: [user_id], references: [user_id])
   projects_under   Project[]
+  certificates     Certificate[] // ✅ Added relation
 }
 
 model Admin {
@@ -98,6 +100,7 @@ model Project {
   professor    ProfessorProfile? @relation(fields: [professor_id], references: [professor_id])
   tasks        Task[]
   students     StudentProfile[]  @relation("ProjectToStudentProfile")
+  certificates Certificate[] // ✅ Added relation
 }
 
 model Application {
@@ -111,7 +114,7 @@ model Application {
 }
 
 model Task {
-  task_id     Int            @id @default(autoincrement())
+  task_id     Int        @id @default(autoincrement())
   project_id  Int
   assigned_to Int?
   title       String
@@ -128,15 +131,6 @@ enum TaskStatus {
   PENDING
   IN_PROGRESS
   COMPLETED
-}
-
-model Notification {
-  notification_id Int                @id @default(autoincrement())
-  user_id         Int
-  message         String
-  status          NotificationStatus @default(UNREAD)
-  created_at      DateTime           @default(now())
-  User            User               @relation(fields: [user_id], references: [user_id])
 }
 
 model Meeting {
@@ -181,9 +175,40 @@ enum ApplicationStatus {
   INTERVIEW_SCHEDULED
 }
 
+model Notification {
+  notification_id Int                @id @default(autoincrement())
+  user_id         Int
+  title           String // New field for title
+  message         String
+  type            NotificationType // New ENUM field for notification type
+  status          NotificationStatus @default(UNREAD)
+  created_at      DateTime           @default(now())
 
+  User User @relation(fields: [user_id], references: [user_id])
+}
+
+enum NotificationType {
+  APPLICATION
+  MILESTONE
+  MEETING
+  COMPLETION
+  MESSAGE
+}
 
 enum NotificationStatus {
   UNREAD
   READ
+}
+
+model Certificate {
+  certificate_id Int      @id @default(autoincrement())
+  student_id     Int
+  professor_id   Int
+  project_id     Int      @unique
+  issue_date     DateTime @default(now())
+  file_url       String?
+
+  student   StudentProfile   @relation(fields: [student_id], references: [student_id])
+  professor ProfessorProfile @relation(fields: [professor_id], references: [professor_id])
+  project   Project          @relation(fields: [project_id], references: [project_id])
 }
