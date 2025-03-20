@@ -48,18 +48,18 @@ model StudentProfile {
   certificates Certificate[] // ✅ Added relation
 }
 
-model MentorProfile {
-  mentor_id   Int       @id @default(autoincrement())
-  user_id     Int       @unique
-  name        String
-  bio         String?
-  skills      String[]
-  experience  String?
-  branch      String
-  year        Int
-  User        User      @relation(fields: [user_id], references: [user_id])
-  projects_in Project[]
-}
+  model MentorProfile {
+    mentor_id   Int       @id @default(autoincrement())
+    user_id     Int       @unique
+    name        String
+    bio         String?
+    skills      String[]
+    experience  String?
+    branch      String
+    year        Int
+    User        User      @relation(fields: [user_id], references: [user_id])
+    projects_in Project[]
+  }
 
 model ProfessorProfile {
   professor_id     Int           @id @default(autoincrement())
