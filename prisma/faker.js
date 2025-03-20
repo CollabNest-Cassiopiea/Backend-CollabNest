@@ -8,7 +8,7 @@ async function seedProjects() {
     console.log('Creating 10 Projects for Student...');
 
     const statuses = ['OPEN', 'CLOSED', 'IN_PROGRESS'];
-    const studentId = 1; // Aryan Vats' user_id
+    const studentId = 2; // Aryan Vats' user_id
 
     for (let i = 0; i < 10; i++) {
       let status;

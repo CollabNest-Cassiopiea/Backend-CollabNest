@@ -1,4 +1,7 @@
 -- CreateEnum
+CREATE TYPE "TaskStatus" AS ENUM ('PENDING', 'IN_PROGRESS', 'COMPLETED');
+
+-- CreateEnum
 CREATE TYPE "Role" AS ENUM ('STUDENT', 'MENTOR', 'PROFESSOR', 'ADMIN');
 
 -- CreateEnum
@@ -8,7 +11,7 @@ CREATE TYPE "ProjectStatus" AS ENUM ('OPEN', 'CLOSED', 'IN_PROGRESS');
 CREATE TYPE "ApplicationStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'INTERVIEW_SCHEDULED');
 
 -- CreateEnum
-CREATE TYPE "TaskStatus" AS ENUM ('PENDING', 'IN_PROGRESS', 'COMPLETED');
+CREATE TYPE "NotificationType" AS ENUM ('APPLICATION', 'MILESTONE', 'MEETING', 'COMPLETION', 'MESSAGE');
 
 -- CreateEnum
 CREATE TYPE "NotificationStatus" AS ENUM ('UNREAD', 'READ');
@@ -42,7 +45,7 @@ CREATE TABLE "StudentProfile" (
     "experience" TEXT,
     "branch" TEXT NOT NULL,
     "year" INTEGER NOT NULL,
-    "rollno" INTEGER NOT NULL,
+    "rollno" TEXT NOT NULL,
 
     CONSTRAINT "StudentProfile_pkey" PRIMARY KEY ("student_id")
 );
@@ -116,24 +119,14 @@ CREATE TABLE "Application" (
 CREATE TABLE "Task" (
     "task_id" SERIAL NOT NULL,
     "project_id" INTEGER NOT NULL,
-    "assigned_to" INTEGER NOT NULL,
+    "assigned_to" INTEGER,
     "title" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "status" "TaskStatus" NOT NULL DEFAULT 'PENDING',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "deadline" INTEGER,
 
     CONSTRAINT "Task_pkey" PRIMARY KEY ("task_id")
-);
-
--- CreateTable
-CREATE TABLE "Notification" (
-    "notification_id" SERIAL NOT NULL,
-    "user_id" INTEGER NOT NULL,
-    "message" TEXT NOT NULL,
-    "status" "NotificationStatus" NOT NULL DEFAULT 'UNREAD',
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "Notification_pkey" PRIMARY KEY ("notification_id")
 );
 
 -- CreateTable
@@ -146,6 +139,41 @@ CREATE TABLE "Meeting" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Meeting_pkey" PRIMARY KEY ("meeting_id")
+);
+
+-- CreateTable
+CREATE TABLE "Feedback" (
+    "feedback_id" SERIAL NOT NULL,
+    "message" TEXT NOT NULL,
+    "user_id" INTEGER NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Feedback_pkey" PRIMARY KEY ("feedback_id")
+);
+
+-- CreateTable
+CREATE TABLE "Notification" (
+    "notification_id" SERIAL NOT NULL,
+    "user_id" INTEGER NOT NULL,
+    "title" TEXT NOT NULL,
+    "message" TEXT NOT NULL,
+    "type" "NotificationType" NOT NULL,
+    "status" "NotificationStatus" NOT NULL DEFAULT 'UNREAD',
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Notification_pkey" PRIMARY KEY ("notification_id")
+);
+
+-- CreateTable
+CREATE TABLE "Certificate" (
+    "certificate_id" SERIAL NOT NULL,
+    "student_id" INTEGER NOT NULL,
+    "professor_id" INTEGER NOT NULL,
+    "project_id" INTEGER NOT NULL,
+    "issue_date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "file_url" TEXT,
+
+    CONSTRAINT "Certificate_pkey" PRIMARY KEY ("certificate_id")
 );
 
 -- CreateTable
@@ -175,6 +203,12 @@ CREATE UNIQUE INDEX "ProfessorProfile_user_id_key" ON "ProfessorProfile"("user_i
 CREATE UNIQUE INDEX "Admin_user_id_key" ON "Admin"("user_id");
 
 -- CreateIndex
+CREATE INDEX "Feedback_user_id_idx" ON "Feedback"("user_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Certificate_project_id_key" ON "Certificate"("project_id");
+
+-- CreateIndex
 CREATE INDEX "_ProjectToStudentProfile_B_index" ON "_ProjectToStudentProfile"("B");
 
 -- AddForeignKey
@@ -196,28 +230,40 @@ ALTER TABLE "Project" ADD CONSTRAINT "Project_mentor_id_fkey" FOREIGN KEY ("ment
 ALTER TABLE "Project" ADD CONSTRAINT "Project_professor_id_fkey" FOREIGN KEY ("professor_id") REFERENCES "ProfessorProfile"("professor_id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Application" ADD CONSTRAINT "Application_student_id_fkey" FOREIGN KEY ("student_id") REFERENCES "StudentProfile"("student_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Application" ADD CONSTRAINT "Application_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "Project"("project_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Application" ADD CONSTRAINT "Application_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "Project"("project_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Application" ADD CONSTRAINT "Application_student_id_fkey" FOREIGN KEY ("student_id") REFERENCES "StudentProfile"("student_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Task" ADD CONSTRAINT "Task_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "Project"("project_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Task" ADD CONSTRAINT "Task_assigned_to_fkey" FOREIGN KEY ("assigned_to") REFERENCES "StudentProfile"("student_id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Notification" ADD CONSTRAINT "Notification_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Meeting" ADD CONSTRAINT "Meeting_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "Project"("project_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Task" ADD CONSTRAINT "Task_assigned_to_fkey" FOREIGN KEY ("assigned_to") REFERENCES "StudentProfile"("student_id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Meeting" ADD CONSTRAINT "Meeting_professor_id_fkey" FOREIGN KEY ("professor_id") REFERENCES "ProfessorProfile"("professor_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Meeting" ADD CONSTRAINT "Meeting_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "Project"("project_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Meeting" ADD CONSTRAINT "Meeting_student_id_fkey" FOREIGN KEY ("student_id") REFERENCES "StudentProfile"("student_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Feedback" ADD CONSTRAINT "Feedback_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Notification" ADD CONSTRAINT "Notification_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Certificate" ADD CONSTRAINT "Certificate_student_id_fkey" FOREIGN KEY ("student_id") REFERENCES "StudentProfile"("student_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Certificate" ADD CONSTRAINT "Certificate_professor_id_fkey" FOREIGN KEY ("professor_id") REFERENCES "ProfessorProfile"("professor_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Certificate" ADD CONSTRAINT "Certificate_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "Project"("project_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_ProjectToStudentProfile" ADD CONSTRAINT "_ProjectToStudentProfile_A_fkey" FOREIGN KEY ("A") REFERENCES "Project"("project_id") ON DELETE CASCADE ON UPDATE CASCADE;

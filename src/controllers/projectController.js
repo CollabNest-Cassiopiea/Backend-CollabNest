@@ -3,65 +3,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// Existing functions
-const getAllProjects = async (req, res) => {
-    const { skill, fieldQ } = req.query;
-    // Convert comma-separated strings to arrays, if applicable
-    const skillArray = skill ? skill.split(',') : [];
-    const fieldArray = fieldQ ? fieldQ.split(',') : [];
-
-    try {
-        const projects = await prisma.project.findMany({
-            where: {
-                AND: [
-                    skillArray.length > 0 
-                        ? { tech_stack: { hasSome: skillArray } } 
-                        : {},
-                    fieldArray.length > 0 
-                        ? { OR: fieldArray.map(field => ({ field: { contains: field, mode: 'insensitive' } })) } 
-                        : {}
-                ]
-            }
-        });
-        res.status(200).json({
-            message: "Projects Fetched.",
-            success: true,
-            projects
-        });
-
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
-
-const getProjectById = async (req, res) => {
-    const { projectId } = req.params;
-    try {
-        const project = await prisma.project.findUnique({
-            where: { project_id: parseInt(projectId) },
-            include: {
-                mentor: true,
-                professor: true,
-                applications: true,
-                tasks: true,
-                meetings: true,
-                students: true
-            }
-        });
-        if (!project) {
-            return res.status(404).json({ error: 'Project not found' });
-        }
-        res.status(200).json({
-            message: "Project info Fetched.",
-            success: true,
-            project
-        });
-
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
-
 // New functions
 
 // Create a new project
@@ -265,6 +206,74 @@ const getStudentProjects = async (req, res) => {
     }
   };
 
+// Fixed getProjectById controller
+const getProjectById = async (req, res) => {
+    const { projectId } = req.params;
+    
+    try {
+        // Validate projectId
+        if (!projectId || isNaN(projectId)) {
+            return res.status(400).json({ error: "Invalid project ID" });
+        }
+
+        const project = await prisma.project.findUnique({
+            where: { 
+                project_id: parseInt(projectId) // Match your Prisma schema field name
+            },
+            include: {
+                mentor: true,
+                professor: true,
+                applications: true,
+                tasks: true,
+                meetings: true,
+                students: true
+            }
+        });
+        
+        if (!project) {
+            return res.status(404).json({ error: 'Project not found' });
+        }
+        
+        res.status(200).json({
+            message: "Project info Fetched.",
+            success: true,
+            project
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Fixed getAllProjects controller
+const getAllProjects = async (req, res) => {
+    const { skill } = req.query;
+    
+    try {
+        const filter = {
+            status: "OPEN",
+            ...(skill && { tech_stack: { hasSome: skill.split(',') } })
+        };
+
+        const projects = await prisma.project.findMany({
+            where: filter,
+            include: {
+                mentor: true,
+                students: true 
+            }
+        });
+
+        res.status(200).json({
+            message: "Projects Fetched.",
+            success: true,
+            projects
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            error: "Failed to fetch projects",
+            details: error.message 
+        });
+    }
+};
 module.exports = {
     getAllProjects,
     getProjectById,
