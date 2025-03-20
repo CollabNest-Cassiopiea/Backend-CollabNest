@@ -7,7 +7,11 @@ const {
     deleteProfile,
 } = require('../controllers/mentorProfileController');
 const express = require('express');
+const { authMiddleware, roleCheck } = require("../middlewares/authMiddleware");
+
 const router = express.Router();
+
+const userController = require('../controllers/mentorProfileController');
 
 // Create or Update MEntor Profile
 router.post('/:id/profile', createOrUpdateProfile);
@@ -22,4 +26,5 @@ router.get('/projects', getProjectsByFilters);
 router.delete('/:id/profile', deleteProfile);
 
 module.exports = router;
+
 

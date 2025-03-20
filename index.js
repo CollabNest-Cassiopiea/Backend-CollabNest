@@ -17,6 +17,7 @@ const meetingRoutes = require('./src/routes/meetingRoutes');
 const feedbackRoutes = require('./src/routes/feedbackRoutes');
 const authRoutes = require('./src/routes/authRoutes');
 const studentProjectRoutes = require('./src/routes/studentProjectRoutes');
+const mentorProjectRoutes = require('./src/routes/mentorProjectRoutes');
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.use('/api/meetings', meetingRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/students',studentProjectRoutes);
+app.use('/api/mentors',mentorProjectRoutes);
 
 // Global Error Handling Middleware
 app.use((err, req, res, next) => {

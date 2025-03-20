@@ -206,6 +206,35 @@ const getStudentProjects = async (req, res) => {
     }
   };
 
+  const getMentorProjects = async (req, res) => {
+    try {
+      const { mentor_id } = req.user; // Get mentor_id from token
+  
+      if (!mentor_id) {
+        return res.status(400).json({ error: "Mentor ID not found in token" });
+      }
+  
+      // ✅ Fixed Query: Filter by `students.some()`
+      const projects = await prisma.project.findMany({
+        where: {
+              mentor_id: mentor_id, // 🔥 Fix: Use `students.some()` instead of `studentId`
+        },
+        include: {
+          students: true,
+          mentor:true,
+          professor: true,
+          applications: true,
+          tasks: true,
+          meetings: true,
+        },
+      });
+  
+      res.status(200).json({ success: true, projects });
+    } catch (error) {
+      console.error("🚨 Error fetching student projects:", error.message);
+      res.status(500).json({ success: false, error: "Internal Server Error" });
+    }
+  };
 // Fixed getProjectById controller
 const getProjectById = async (req, res) => {
     const { projectId } = req.params;
@@ -281,5 +310,6 @@ module.exports = {
     updateProject,
     deleteProject,
     trackProjectProgress,
-    getStudentProjects
+    getStudentProjects,
+    getMentorProjects
 };
