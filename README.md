@@ -1,43 +1,214 @@
 # CollabNest-backend
 
-collabnest-backend/
-├── .env                       # Environment variables (DB URL, API keys, etc.)  
-├── .gitignore                 # Specifies intentionally untracked files that Git should ignore  
-├── README.md                  # Project description, setup instructions, etc.  
-├── package.json               # Node.js project configuration  
-├── package-lock.json          # Records the exact versions of dependencies  
-├── index.js                   # Main server file (entry point)  
-├── firebase-admin.js          # Firebase Admin SDK initialization  
-├── prisma/                    # Prisma ORM configuration  
-│   ├── schema.prisma          # Database schema definition  
-│   └── migrations/            # Database migrations  
-├── src/                       # Source code directory  
-│   ├── middleware/           # Middleware functions  
-│   │   ├── authMiddleware.js  # Authentication middleware (RBAC)  
-│   │   └── errorMiddleware.js # Error handling middleware  
-│   ├── routes/               # API route definitions  
-│   │   ├── authRoutes.js      # Authentication routes  
-│   │   ├── projectRoutes.js   # Project-related routes  
-│   │   ├── userRoutes.js      # User-related routes  
-│   │   ├── taskRoutes.js      # Task-related routes  
-│   │   └── meetingRoutes.js   # Google Meet/Zoom API routes  
-│   ├── controllers/          # Route handlers (business logic)  
-│   │   ├── authController.js  # Authentication controllers  
-│   │   ├── projectController.js# Project controllers  
-│   │   ├── userController.js  # User controllers  
-│   │   ├── taskController.js  # Task controllers  
-│   │   └── meetingController.js# Meeting controllers  
-│   ├── models/               # Prisma models  
-│   │   ├── User.js            # User model  
-│   │   ├── Project.js         # Project model  
-│   │   ├── Task.js            # Task model  
-│   │   └── Comment.js         # Comment model  
-│   ├── services/             # Reusable services  
-│   │   ├── recommendationService.js # Recommendation engine  
-│   │   ├── notificationService.js  # Notification service (Email, WhatsApp)  
-│   │   └── certificateService.js  # Certificate generation service
-│   ├── utils/                # Utility functions
-│   │   └── helpers.js         # Helper functions
-│   └── config/               # Configuration files
-│       └── firebaseConfig.js # Firebase configuration
-├── tests/                     # Test files
+# README.md
+
+## Project Name: CollabNest
+
+### Team Name: Cassiopeia
+
+---
+
+## Table of Contents
+1. [Introduction](#introduction)
+2. [Key Features and Functionalities](#key-features-and-functionalities)
+3. [How to Run the Project](#how-to-run-the-project)
+4. [Source Code Structure](#source-code-structure)
+5. [Dependencies](#dependencies)
+6. [Installation Steps](#installation-steps)
+7. [Demo Video](#demo-video)
+
+---
+
+## Introduction
+Welcome to CollabNest, a structured space for guided learning designed to bridge the gap between theoretical knowledge and practical implementation. This platform aims to connect students with meaningful projects, mentors, and professors, fostering a collaborative environment for skill development and project-based learning.
+
+---
+
+## Key Features and Functionalities
+- **Multi-Domain Support:** Projects across Core Dev, Blockchain, Machine Learning, and more.
+- **Smart Matching:** AI-driven project recommendations based on skills and interests.
+- **Guided Learning:** Adaptive learning pathways and progress tracking.
+- **Professor Collaboration:** Professors can list research opportunities and recruit students.
+- **Structured Mentorship:** Senior students mentor juniors in project-based learning.
+- **Certification & Recognition:** Auto-generated certificates and portfolio building.
+
+---
+
+## How to Run the Project
+Follow these steps to set up and run the project on your local machine.
+
+### Prerequisites
+- **Node.js** (Recommended: Latest LTS version)
+- **Vite** (For frontend development)
+- **PostgreSQL** (Database)
+- **Prisma** (ORM for database schema)
+- **Express.js** (Backend framework)
+- **Package Manager:** npm / yarn / pip
+- **Dotenv** (For managing environment variables)
+
+---
+
+## Installation Steps
+
+### Backend Setup
+1. **Install Dependencies:**
+   ```bash
+   cd BACKEND-COLLABNEST/MLAPI
+   npm install
+   ```
+
+2. **Create a `.env` File:**
+   - Create a `.env` file in the root directory of the backend.
+   - Add the following environment variables and replace the placeholders with your credentials:
+     ```env
+     DATABASE_URL="postgresql://username:password@localhost:5432/dbname"
+     ```
+
+3. **Set Up the Database:**
+   - Run the following command to set up the database schema using Prisma:
+     ```bash
+     npx prisma generate
+     ```
+
+4. **Start the Backend Server:**
+   ```bash
+   npm start
+   ```
+   - The backend server will start at `http://localhost:3000`.
+
+5. **Run the Reverse Proxy:**
+   - Execute the `reverse_proxy.exe` file to enable reverse proxy functionality.
+
+---
+
+### Frontend Setup
+1. **Install Dependencies:**
+   ```bash
+   cd FRONTEND-COLLABNEST
+   npm install
+   ```
+
+2. **Start the Frontend Server:**
+   ```bash
+   npm run dev
+   ```
+   - The frontend server will start at `http://localhost:5173`.
+
+---
+
+### Project Recommendation System Setup
+1. **Navigate to the MLAPI Folder:**
+   ```bash
+   cd BACKEND-COLLABNEST/MLAPI
+   ```
+
+2. **Install Required Libraries:**
+   ```bash
+   pip install numpy joblib fastapi scikit-learn uvicorn
+   ```
+
+3. **Run the Recommendation System:**
+   ```bash
+   python main.py
+   ```
+
+---
+
+## Access the Application
+- Open your browser and navigate to `http://localhost:80` to access the CollabNest platform.
+
+---
+
+## Source Code Structure
+
+### Backend Structure
+```
+BACKEND-COLLABNEST/
+│
+├── MLAPI/
+│   ├── node_modules/
+│   ├── prisma/
+│   ├── scripts/
+│   ├── src/
+│   │   ├── config/
+│   │   ├── controllers/
+│   │   ├── middlewares/
+│   │   ├── routes/
+│   │   └── utils/
+│   │       ├── .gitkeep
+│   │       ├── errorHandler.js
+│   │       ├── fileUpload.js
+│   │       ├── firebase.js
+│   │       ├── googleMeetService.js
+│   │       ├── paginationHelper.js
+│   │       └── sendNotifications.js
+│   ├── .env
+│   ├── .gitignore
+│   ├── index.js
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── README.md
+│   ├── reverse_proxy.exe
+│   └── reverse_proxy.py
+```
+
+### Frontend Structure
+```
+FRONTEND-COLLABNEST/
+│
+├── node_modules/
+├── public/
+├── src/
+│   ├── assets/
+│   ├── components/
+│   ├── hooks/
+│   ├── lib/
+│   ├── pages/
+│   │   ├── mentor-dashboard/
+│   │   ├── professor-dashboard/
+│   │   └── student-dashboard/
+│   ├── Landing.tsx
+│   ├── login.tsx
+│   ├── logout.tsx
+│   ├── role.tsx
+│   ├── signup.tsx
+│   ├── routes/
+│   ├── store/
+│   ├── types/
+│   ├── utils/
+│   ├── App.css
+│   ├── App.tsx
+│   ├── index.css
+│   ├── main.tsx
+│   └── types.ts
+├── vite-env.d.ts
+├── .gitignore
+├── components.json
+└── eslint.config.js
+```
+
+---
+
+## Dependencies
+- **Frontend:** React, Tailwind CSS, Material UI
+- **Backend:** Node.js, Express.js, Firebase
+- **Database:** PostgreSQL
+- **AI/ML:** Scikit-Learn, TensorFlow
+
+---
+
+## Demo Video
+A demo video is included in the submission ZIP file. The video covers:
+- Introduction to the solution
+- Key features and functionalities
+- Walkthrough of the platform
+- Demonstration of unique aspects
+- Code walkthrough
+
+---
+
+Thank you for reviewing our project! We look forward to your feedback.
+
+---
+
+**Note:** This is the primary submission for Cassiopeia.
