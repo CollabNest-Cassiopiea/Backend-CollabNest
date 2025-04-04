@@ -223,31 +223,23 @@ A demo video is included in the submission ZIP file. The video covers:
 ---
 
 ## Contributors
-🧠 Team Leads
-@AAnimeshTripathy
 
-@Look-man
+### 🧠 Team Leads  
+- [@AAnimeshTripathy](https://github.com/AAnimeshTripathy)  
+- [@Look-man](https://github.com/Look-man)
 
-💻 Team Members
-@Diptanshu-215
+### 💻 Team Members  
+- [@Diptanshu-215](https://github.com/Diptanshu-215)  
+- [@A-ryanVAT-S](https://github.com/A-ryanVAT-S)  
+- [@Shreesh-125](https://github.com/Shreesh-125)  
+- [@Slamix6733](https://github.com/Slamix6733)  
+- [@codershivam45](https://github.com/codershivam45)  
+- [@Anish-ai](https://github.com/Anish-ai)  
+- [@thefcraft](https://github.com/thefcraft)  
+- [@CyberSavant2024](https://github.com/CyberSavant2024)  
+- [@Grish1221](https://github.com/Grish1221)  
+- [@Enum2](https://github.com/Enum2)
 
-@A-ryanVAT-S
-
-@Shreesh-125
-
-@Slamix6733
-
-@codershivam45
-
-@Anish-ai
-
-@thefcraft
-
-@CyberSavant2024
-
-@Grish1221
-
-@Enum2
 ---
 
 Thank you for reviewing our project! We look forward to your feedback.
