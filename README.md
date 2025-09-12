@@ -227,6 +227,7 @@ A demo video is included in the submission ZIP file. The video covers:
 ### 🧠 Team Leads  
 - [@AAnimeshTripathy](https://github.com/AAnimeshTripathy)  
 - [@Look-man](https://github.com/Look-man)
+- [@kanahia1](https://github.com/kanahia1)
 
 ### 💻 Team Members  
 - [@Diptanshu-215](https://github.com/Diptanshu-215)  
